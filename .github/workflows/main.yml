@@ -41,14 +41,16 @@ jobs:
       - name: Configure for ESP32C6 Thread
         run: |
           cd $GITHUB_WORKSPACE  # Since "light" is the repo, we stay in root
+          
           if [ -f "sdkconfig.esp32c6.thread" ]; then
             cp sdkconfig.esp32c6.thread sdkconfig
-          else if [ -f "sdkconfig.defaults.esp32c6_thread" ]; then 
+          elif [ -f "sdkconfig.defaults.esp32c6_thread" ]; then 
             cp sdkconfig.defaults.esp32c6_thread sdkconfig
           else
-            echo "Error: sdkconfig.esp32c6.thread not found!"
+            echo "Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults.esp32c6_thread found!"
             exit 1
           fi
+          
           source ~/esp-idf/export.sh
           idf.py reconfigure
 
