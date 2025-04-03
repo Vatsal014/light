@@ -19,6 +19,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Debug Repository Structure
+        run: ls -R  # Print directory structure for debugging
+
       - name: Set up ESP-IDF
         run: |
           sudo apt update
@@ -37,14 +40,19 @@ jobs:
 
       - name: Configure for ESP32C6 Thread
         run: |
-          cd $GITHUB_WORKSPACE/examples/light
-          cp sdkconfig.esp32c6.thread sdkconfig  # Use the correct filename
+          cd $GITHUB_WORKSPACE  # Since "light" is the repo, we stay in root
+          if [ -f "sdkconfig.esp32c6.thread" ]; then
+            cp sdkconfig.esp32c6.thread sdkconfig
+          else
+            echo "Error: sdkconfig.esp32c6.thread not found!"
+            exit 1
+          fi
           source ~/esp-idf/export.sh
           idf.py reconfigure
 
       - name: Build the Project
         run: |
-          cd $GITHUB_WORKSPACE/examples/light
+          cd $GITHUB_WORKSPACE
           source ~/esp-idf/export.sh
           idf.py build
 
@@ -52,4 +60,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: esp32c6-thread-light-firmware
-          path: examples/light/build/*.bin
+          path: build/*.bin
