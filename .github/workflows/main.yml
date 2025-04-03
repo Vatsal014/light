@@ -45,14 +45,14 @@ jobs:
       - name: Configure for ESP32C6 Thread
         run: |
           echo "Checking for sdkconfig files..."
-          find . -name "sdkconfig.esp32c6.thread" -o -name "sdkconfig.defaults.c6_thread"
+          find . -name "sdkconfig.esp32c6.thread" -o -name "sdkconfig.defaults"
           SDKCONFIG_PATH=$(find . -name "sdkconfig.esp32c6.thread" | head -n 1)
           if [ -z "$SDKCONFIG_PATH" ]; then
-            SDKCONFIG_PATH=$(find . -name "sdkconfig.defaults.c6_thread" | head -n 1)
+            SDKCONFIG_PATH=$(find . -name "sdkconfig.defaults" | head -n 1)
           fi
           
           if [ -z "$SDKCONFIG_PATH" ]; then
-            echo "❌ Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults.c6_thread found!"
+            echo "❌ Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults found!"
             exit 1
           fi
           
