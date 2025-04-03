@@ -40,7 +40,8 @@ jobs:
 
       - name: Configure for ESP32C6 Thread
         run: |
-          cd $GITHUB_WORKSPACE  # Since "light" is the repo, we stay in root
+          ls
+         # cd $GITHUB_WORKSPACE  # Since "light" is the repo, we stay in root
           
           SDKCONFIG_PATH=$(find . -name "sdkconfig.esp32c6.thread" | head -n 1)
           if [ -z "$SDKCONFIG_PATH" ]; then
