@@ -21,15 +21,19 @@ jobs:
 
       - name: Debug Repository Structure
         run: |
-          echo "Current Working Directory:"
-          pwd
-          echo "Listing Files and Folders:"
-          ls -R  # Show the full directory structure for debugging
+          echo "Current Directory: $(pwd)"
+          echo "Listing Files:"
+          ls -R  # Debug all files
 
       - name: Set up ESP-IDF
         run: |
           sudo apt update
           sudo apt install -y python3 python3-pip git wget flex bison gperf cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+          
+          # Force Python 3.10 (to avoid issues with 3.12)
+          sudo apt install -y python3.10 python3.10-venv python3.10-dev
+          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+          
           git clone --recursive https://github.com/espressif/esp-idf.git ~/esp-idf
           cd ~/esp-idf
           git checkout v5.1
@@ -63,11 +67,18 @@ jobs:
           source ~/esp-idf/export.sh
           idf.py reconfigure
 
+      - name: Debug CMake Configuration
+        run: |
+          echo "Running CMake manually to check errors..."
+          cd $GITHUB_WORKSPACE
+          source ~/esp-idf/export.sh
+          cmake -G Ninja -DPYTHON=$(which python3) -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 .
+      
       - name: Build the Project
         run: |
           cd $GITHUB_WORKSPACE
           source ~/esp-idf/export.sh
-          idf.py build
+          idf.py build || (echo "🔥 Build failed! Check logs in build/log/" && exit 1)
 
       - name: Upload Firmware Artifacts
         uses: actions/upload-artifact@v4
