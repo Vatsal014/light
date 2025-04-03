@@ -29,11 +29,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y python3 python3-pip git wget flex bison gperf cmake ninja-build ccache libffi-dev libssl-dev dfu-util
-          
-          # Force Python 3.10 (to avoid issues with 3.12)
-          sudo apt install -y python3.10 python3.10-venv python3.10-dev
-          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-          
+
           git clone --recursive https://github.com/espressif/esp-idf.git ~/esp-idf
           cd ~/esp-idf
           git checkout v5.1
@@ -63,7 +59,7 @@ jobs:
 
           echo "✅ Found sdkconfig at: $SDKCONFIG_PATH"
           cp "$SDKCONFIG_PATH" sdkconfig
-          
+
           source ~/esp-idf/export.sh
           idf.py reconfigure
 
@@ -73,7 +69,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           source ~/esp-idf/export.sh
           cmake -G Ninja -DPYTHON=$(which python3) -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 .
-      
+
       - name: Build the Project
         run: |
           cd $GITHUB_WORKSPACE
