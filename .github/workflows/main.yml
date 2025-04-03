@@ -37,14 +37,14 @@ jobs:
 
       - name: Configure for ESP32C6 Thread
         run: |
-          cd $GITHUB_WORKSPACE
-          cp sdkconfig.defaults.esp32c6_thread sdkconfig
+          cd $GITHUB_WORKSPACE/examples/light
+          cp sdkconfig.esp32c6.thread sdkconfig  # Use the correct filename
           source ~/esp-idf/export.sh
           idf.py reconfigure
 
       - name: Build the Project
         run: |
-          cd $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/examples/light
           source ~/esp-idf/export.sh
           idf.py build
 
@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: esp32c6-thread-light-firmware
-          path: build/*.bin
+          path: examples/light/build/*.bin
