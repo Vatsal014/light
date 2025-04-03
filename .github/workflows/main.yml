@@ -28,11 +28,23 @@ jobs:
         run: |
           git clone --recursive https://github.com/espressif/esp-idf.git ~/esp-idf
           cd ~/esp-idf
-          git checkout v5.1  # Change this to the version you're using
+          git checkout v5.1  # Change this to match your ESP-IDF version
           ./install.sh
+
+      - name: Clone ESP-Matter
+        run: |
+          git clone --recursive https://github.com/espressif/esp-matter.git ~/esp-matter
+          cd ~/esp-matter
+          git checkout v1.0  # Change this based on the ESP-Matter version you're using
+
+      - name: Set Environment Variables
+        run: |
+          echo "export IDF_PATH=~/esp-idf" >> $GITHUB_ENV
+          echo "export ESP_MATTER_PATH=~/esp-matter" >> $GITHUB_ENV
+          echo "export PATH=$IDF_PATH/tools:$PATH" >> $GITHUB_ENV
 
       - name: Build ESP-Matter Light Example
         run: |
           . ~/esp-idf/export.sh
-          idf.py set-target esp32c6  # Adjust target as needed
+          idf.py set-target esp32c6  # Change the target as needed
           idf.py build
