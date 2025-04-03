@@ -18,19 +18,23 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up ESP-IDF
-        uses: espressif/setup-esp-idf@v1
+        uses: espressif/setup-esp-idf@v1.3.3
         with:
           version: latest
-      
+
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y ninja-build ccache libffi-dev libssl-dev cmake
-          python -m pip install --upgrade pip
+          sudo apt install -y ninja-build ccache libffi-dev libssl-dev cmake python3-pip python3-setuptools python3-serial
+          python3 -m pip install --upgrade pip
           pip install -r $IDF_PATH/requirements.txt
+
+      - name: Configure ESP-IDF Target
+        run: |
+          . $IDF_PATH/export.sh
+          idf.py set-target esp32c6  # Change target if needed
 
       - name: Build ESP-Matter Light Example
         run: |
           . $IDF_PATH/export.sh
-          idf.py set-target esp32c6  # Change based on your target
           idf.py build
