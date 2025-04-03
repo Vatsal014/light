@@ -20,7 +20,11 @@ jobs:
           submodules: recursive
 
       - name: Debug Repository Structure
-        run: ls -R  # Print directory structure for debugging
+        run: |
+          echo "Current Working Directory:"
+          pwd
+          echo "Listing Files and Folders:"
+          ls -R  # Show the full directory structure for debugging
 
       - name: Set up ESP-IDF
         run: |
@@ -40,20 +44,20 @@ jobs:
 
       - name: Configure for ESP32C6 Thread
         run: |
-          ls
-         # cd $GITHUB_WORKSPACE  # Since "light" is the repo, we stay in root
-          
+          echo "Checking for sdkconfig files..."
+          find . -name "sdkconfig.esp32c6.thread" -o -name "sdkconfig.defaults.c6_thread"
+
           SDKCONFIG_PATH=$(find . -name "sdkconfig.esp32c6.thread" | head -n 1)
           if [ -z "$SDKCONFIG_PATH" ]; then
             SDKCONFIG_PATH=$(find . -name "sdkconfig.defaults.esp32c6_thread" | head -n 1)
           fi
-      
+
           if [ -z "$SDKCONFIG_PATH" ]; then
-            echo "Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults.esp32c6_thread found!"
+            echo "❌ Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults.esp32c6_thread found!"
             exit 1
           fi
-      
-          echo "Found sdkconfig at: $SDKCONFIG_PATH"
+
+          echo "✅ Found sdkconfig at: $SDKCONFIG_PATH"
           cp "$SDKCONFIG_PATH" sdkconfig
           
           source ~/esp-idf/export.sh
