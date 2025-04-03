@@ -42,14 +42,18 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE  # Since "light" is the repo, we stay in root
           
-          if [ -f "sdkconfig.esp32c6.thread" ]; then
-            cp sdkconfig.esp32c6.thread sdkconfig
-          elif [ -f "sdkconfig.defaults.esp32c6_thread" ]; then 
-            cp sdkconfig.defaults.esp32c6_thread sdkconfig
-          else
+          SDKCONFIG_PATH=$(find . -name "sdkconfig.esp32c6.thread" | head -n 1)
+          if [ -z "$SDKCONFIG_PATH" ]; then
+            SDKCONFIG_PATH=$(find . -name "sdkconfig.defaults.esp32c6_thread" | head -n 1)
+          fi
+      
+          if [ -z "$SDKCONFIG_PATH" ]; then
             echo "Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults.esp32c6_thread found!"
             exit 1
           fi
+      
+          echo "Found sdkconfig at: $SDKCONFIG_PATH"
+          cp "$SDKCONFIG_PATH" sdkconfig
           
           source ~/esp-idf/export.sh
           idf.py reconfigure
