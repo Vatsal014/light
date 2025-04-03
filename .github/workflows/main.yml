@@ -1,4 +1,4 @@
-name: ESP-Matter Light Example Build (ESP32C6 Thread)
+name: ESP-Matter Build
 
 on:
   push:
@@ -14,80 +14,23 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up ESP-IDF
+        uses: espressif/setup-esp-idf@v1
         with:
-          submodules: recursive
-
-      - name: Debug Repository Structure
-        run: |
-          echo "Current Directory: $(pwd)"
-          echo "Listing Files:"
-          ls -R  
-
-      - name: Install Dependencies
+          version: latest
+      
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3 python3-pip git wget flex bison gperf cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+          sudo apt install -y ninja-build ccache libffi-dev libssl-dev cmake
+          python -m pip install --upgrade pip
+          pip install -r $IDF_PATH/requirements.txt
 
-      - name: Clone ESP-Matter and ESP-IDF
+      - name: Build ESP-Matter Light Example
         run: |
-          cd $GITHUB_WORKSPACE
-          
-          # Ensure ESP-Matter repository is properly initialized
-          git submodule update --init --recursive
-          
-          # Define ESP-Matter path
-          export ESP_MATTER_PATH=$GITHUB_WORKSPACE
-          echo "ESP_MATTER_PATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
-          
-          # ESP-Matter includes ESP-IDF as a submodule, use that version
-          IDF_PATH="$GITHUB_WORKSPACE/connectedhomeip/esp-idf"
-          if [ ! -d "$IDF_PATH" ]; then
-            echo "❌ ESP-IDF not found in expected path: $IDF_PATH"
-            exit 1
-          fi
-          echo "✅ Found ESP-IDF at: $IDF_PATH"
-          echo "IDF_PATH=$IDF_PATH" >> $GITHUB_ENV
-
-          # Install ESP-IDF dependencies
-          cd $IDF_PATH
-          ./install.sh
-          
-      - name: Configure for ESP32C6 Thread
-        run: |
-          source $IDF_PATH/export.sh
-          cd $GITHUB_WORKSPACE
-          
-          echo "Checking for sdkconfig files..."
-          SDKCONFIG_PATH=$(find . -name "sdkconfig.esp32c6.thread" | head -n 1)
-          if [ -z "$SDKCONFIG_PATH" ]; then
-            SDKCONFIG_PATH=$(find . -name "sdkconfig.defaults" | head -n 1)
-          fi
-          
-          if [ -z "$SDKCONFIG_PATH" ]; then
-            echo "❌ Error: Neither sdkconfig.esp32c6.thread nor sdkconfig.defaults found!"
-            exit 1
-          fi
-          
-          echo "✅ Found sdkconfig at: $SDKCONFIG_PATH"
-          cp "$SDKCONFIG_PATH" sdkconfig
-          idf.py reconfigure
-
-      - name: Debug CMake Configuration
-        run: |
-          source $IDF_PATH/export.sh
-          cd $GITHUB_WORKSPACE
-          cmake -G Ninja -DPYTHON=$(which python3) -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 .
-
-      - name: Build the Project
-        run: |
-          source $IDF_PATH/export.sh
-          cd $GITHUB_WORKSPACE
-          idf.py build || (echo "🔥 Build failed! Check logs in build/log/" && exit 1)
-
-      - name: Upload Firmware Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: esp32c6-thread-light-firmware
-          path: build/*.bin
+          . $IDF_PATH/export.sh
+          idf.py set-target esp32c6  # Change based on your target
+          idf.py build
