@@ -23,7 +23,7 @@ jobs:
         run: |
           echo "Current Directory: $(pwd)"
           echo "Listing Files:"
-          ls -R  # Debug all files
+          ls -R  
 
       - name: Install Dependencies
         run: |
@@ -33,19 +33,21 @@ jobs:
       - name: Clone ESP-Matter and ESP-IDF
         run: |
           cd $GITHUB_WORKSPACE
+          
+          # Ensure ESP-Matter repository is properly initialized
           git submodule update --init --recursive
+          
+          # Define ESP-Matter path
           export ESP_MATTER_PATH=$GITHUB_WORKSPACE
           echo "ESP_MATTER_PATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           
-          # Set up ESP-IDF (based on ESP-Matter's requirements)
-          cd $GITHUB_WORKSPACE/connectedhomeip/connectedhomeip/connectedhomeip
-          IDF_PATH=$(find . -type d -name "esp-idf" | head -n 1)
-          if [ -z "$IDF_PATH" ]; then
-            echo "❌ ESP-IDF not found in ESP-Matter repo! Exiting."
+          # ESP-Matter includes ESP-IDF as a submodule, use that version
+          IDF_PATH="$GITHUB_WORKSPACE/connectedhomeip/esp-idf"
+          if [ ! -d "$IDF_PATH" ]; then
+            echo "❌ ESP-IDF not found in expected path: $IDF_PATH"
             exit 1
           fi
           echo "✅ Found ESP-IDF at: $IDF_PATH"
-          export IDF_PATH=$GITHUB_WORKSPACE/$IDF_PATH
           echo "IDF_PATH=$IDF_PATH" >> $GITHUB_ENV
 
           # Install ESP-IDF dependencies
